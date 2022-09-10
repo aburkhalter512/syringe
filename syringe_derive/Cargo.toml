@@ -1,0 +1,10 @@
+[package]
+name = "syringe_derive"
+description = "Macros for syringe, a compile-time dependency injection framework"
+version = "0.1.0"
+edition = "2021"
+repository = "https://github.com/aburkhalter512/syringe"
+license = "MIT"
+keywords = ["di", "dependency injection", "ioc", "inversion of control", "compile-time"]
+
+[dependencies]

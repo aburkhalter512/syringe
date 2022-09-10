@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "syringe",
+    "syringe_derive",
+]
