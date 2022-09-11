@@ -1,0 +1,28 @@
+name: Publish Crate
+on:
+  workflow_dispatch:
+    inputs:
+      semver:
+        description: 'SemVer Keyword'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - major
+        - minor
+        - patch
+
+jobs:
+  publish-crate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+      - name: Install cargo-workspaces
+        run: cargo install cargo-workspaces
+      - name: Publish with ${{ inputs.semver }} version
+        run: cargo ws publish ${{ inputs.semver }} --token ${{ secrets.CRATESIO_TOKEN }}
+
