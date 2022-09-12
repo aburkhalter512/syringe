@@ -8,4 +8,6 @@ license = "MIT"
 keywords = ["di", "dependency injection", "ioc", "inversion of control", "compile-time"]
 
 [dependencies]
-syringe_derive = { version = "~0.1.0", path = "../syringe_derive", optional = true }
+frunk = "0.4.0"
+once_cell = "1.14.0"
+# syringe_derive = { version = "~0.1.0", path = "../syringe_derive", optional = true }
