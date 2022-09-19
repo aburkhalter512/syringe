@@ -6,47 +6,16 @@ use std::sync::Arc;
 use crate::inject::Inject;
 use crate::provider::Provider;
 
-/// `ServiceProvider` struct is used as an IoC-container in which you declare your dependencies.
+/// `Module` contains all dependencies than can be injected and is used to resolve a struct that implements the `Inject`
+/// trait. It contains a list of providers, which determine how individual dependencies are initialized
+/// and how they are retrieved when initializing other dependencies.
 ///
-/// Algorithm for working in `ServiceProvider` is:
-/// 1. Create an empty by `ServiceProvider::new` function.
-/// 2. Declare your dependencies using `add_*` methods (more about theirs read below).
-/// 3. Fork `ServiceProvider` when you need working with scoped sessions (like when you processing web request).
-/// 4. Get needed dependencies from container using `Resolver::resolve` trait.
+/// There are two primary methods for interacting with a `Module`: `Module::add()` and
+/// `Resolver::resolve()`. They add dependencies to a `Module` and resolve structs by injecting
+/// dependencies contained within the `Module`, respecitvely.
 ///
-/// If you do not register all of needed dependencies, then compiler do not compile your code. If error
-/// puts you into a stupor, read our [manual] about how read errors.
-///
-/// [manual]: https://github.com/p0lunin/teloc/blob/master/HOW-TO-READ-ERRORS.md
-///
-/// Example of usage `ServiceProvider`:
-/// ```
-/// use std::rc::Rc;
-/// use teloc::*;
-///
-/// struct ConstService {
-///     number: Rc<i32>,
-/// }
-///
-/// #[inject]
-/// impl ConstService {
-///     pub fn new(number: Rc<i32>) -> Self {
-///         ConstService { number }
-///     }
-/// }
-///
-/// #[derive(Dependency)]
-/// struct Controller {
-///     number_service: ConstService,
-/// }
-///
-/// let container = ServiceProvider::new()
-///     .add_transient::<ConstService>()
-///     .add_transient::<Controller>();
-/// let scope = container.fork().add_instance(Rc::new(10));
-/// let controller: Controller = scope.resolve();
-/// assert_eq!(*controller.number_service.number, 10);
-/// ```
+/// If a dependency has not be added to a module, and thus has not been made injectable, a compile-time error
+/// will be emitted when attempting to call `Resolver::resolve()`.
 #[derive(Debug)]
 pub struct Module<ParentModule, Providers> {
     pub(crate) parent_module: ParentModule,
