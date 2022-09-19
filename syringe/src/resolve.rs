@@ -2,6 +2,7 @@ use frunk::prelude::*;
 use frunk::HCons;
 use frunk::HNil;
 
+use crate::provider::Singleton;
 use crate::provider::{Instance, Provider, Transient};
 use crate::select_provider::SelectProvider;
 
@@ -18,6 +19,20 @@ where
     T: 'provider,
 {
     fn resolve(&'module self) -> T {
+        let dependencies = self.resolve_dependencies();
+        self.select().provide(dependencies)
+    }
+}
+
+impl<'module, 'provider, Module, T, Dependencies, Index, Infer>
+    Resolver<'module, Singleton<T>, &'provider T, (Dependencies, Index, Infer)> for Module
+where
+    Module: SelectProvider<'module, &'provider Singleton<T>, Index>
+        + ResolveDependencies<'module, Dependencies, Infer>,
+    Singleton<T>: Provider<'provider, &'provider T, Dependencies>,
+    T: 'provider,
+{
+    fn resolve(&'module self) -> &'provider T {
         let dependencies = self.resolve_dependencies();
         self.select().provide(dependencies)
     }
