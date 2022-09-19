@@ -3,6 +3,8 @@ use std::marker::PhantomData;
 use once_cell::sync::OnceCell;
 
 #[derive(Debug)]
+pub trait Provider<T> {}
+
 pub struct TransientProvider<T>(PhantomData<T>);
 impl<T> TransientProvider<T> {
     pub fn new() -> Self {
@@ -15,6 +17,8 @@ impl<T> Default for TransientProvider<T> {
         Self::new()
     }
 }
+
+impl<T> Provider<T> for TransientProvider<T> {}
 
 #[derive(Debug)]
 pub struct SingletonProvider<T>(OnceCell<T>);
@@ -30,6 +34,8 @@ impl<T> Default for SingletonProvider<T> {
     }
 }
 
+impl<T> Provider<T> for SingletonProvider<T> {}
+
 #[derive(Debug)]
 pub struct InstanceProvider<T>(T);
 impl<T> InstanceProvider<T> {
@@ -37,3 +43,5 @@ impl<T> InstanceProvider<T> {
         Self(instance)
     }
 }
+
+impl<T> Provider<T> for InstanceProvider<T> {}

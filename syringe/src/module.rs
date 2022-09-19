@@ -3,7 +3,8 @@ use frunk::{HCons, HNil};
 use std::rc::Rc;
 use std::sync::Arc;
 
-use crate::provider::{InstanceProvider, SingletonProvider, TransientProvider};
+use crate::inject::Inject;
+use crate::provider::{InstanceProvider, Provider, SingletonProvider, TransientProvider};
 
 /// `ServiceProvider` struct is used as an IoC-container in which you declare your dependencies.
 ///
@@ -94,10 +95,10 @@ impl<ParentModule, Providers> Module<ParentModule, Providers> {
 }
 
 impl<ParentModule, Providers: HList> Module<ParentModule, Providers> {
-    pub fn add<Provider>(
+    pub fn add<Dependencies, T: Inject<Dependencies>, P: Provider<T>>(
         self,
-        provider: Provider,
-    ) -> Module<ParentModule, HCons<Provider, Providers>> {
+        provider: P,
+    ) -> Module<ParentModule, HCons<P, Providers>> {
         let Module {
             parent_module,
             providers,
@@ -106,125 +107,5 @@ impl<ParentModule, Providers: HList> Module<ParentModule, Providers> {
             parent_module,
             providers: providers.prepend(provider),
         }
-    }
-
-    /// Add dependency with the `Transient` lifetime. Transient services will be created each time
-    /// when it called. Use this lifetime for lightweight stateless services.
-    ///
-    /// Can be resolved only by ownership.
-    ///
-    /// Usage:
-    /// ```
-    /// use teloc::*;
-    /// use uuid::Uuid;
-    ///
-    /// struct Service { uuid: Uuid }
-    /// #[inject]
-    /// impl Service {
-    ///     fn new() -> Self { Self { uuid: Uuid::new_v4() } }
-    /// }
-    ///
-    /// let sp = ServiceProvider::new()
-    ///     .add_transient::<Service>();
-    ///
-    /// let s1: Service = sp.resolve();
-    /// let s2: Service = sp.resolve();
-    ///
-    /// assert_ne!(s1.uuid, s2.uuid);
-    /// ```
-    pub fn add_transient<T>(self) -> Module<ParentModule, HCons<TransientProvider<T>, Providers>> {
-        self.add(TransientProvider::<T>::new())
-    }
-
-    /// Add dependency with the `Singleton` lifetime. Singleton services will be created only one
-    /// time when it will be called first time. It will be same between different calls in parent
-    /// and forked `ServiceProvider`
-    ///
-    /// Can be resolved by reference or by cloning. If you wish to clone this dependency then it
-    /// must implement `DependencyClone` trait. For more information see `DependencyClone` trait.
-    ///
-    /// Usage:
-    /// ```
-    /// use teloc::*;
-    /// use uuid::Uuid;
-    ///
-    /// struct Service { uuid: Uuid }
-    /// #[inject]
-    /// impl Service {
-    ///     fn new() -> Self { Self { uuid: Uuid::new_v4() } }
-    /// }
-    ///
-    /// let sp = ServiceProvider::new()
-    ///     .add_singleton::<Service>();
-    /// let scope = sp.fork();
-    ///
-    /// let s1: &Service = sp.resolve();
-    /// let s2: &Service = scope.resolve();
-    ///
-    /// assert_eq!(s1.uuid, s2.uuid);
-    /// ```
-    ///
-    /// Usage with cloning:
-    ///
-    /// ```
-    /// use teloc::*;
-    /// use uuid::Uuid;
-    /// use std::rc::Rc;
-    ///
-    /// struct Service { uuid: Uuid }
-    /// #[inject]
-    /// impl Service {
-    ///     fn new() -> Self { Self { uuid: Uuid::new_v4() } }
-    /// }
-    ///
-    /// let sp = ServiceProvider::new()
-    ///     .add_singleton::<Rc<Service>>();
-    ///
-    /// let s1: Rc<Service> = sp.resolve();
-    /// let s2: Rc<Service> = sp.resolve();
-    ///
-    /// assert_eq!(s1.uuid, s2.uuid)
-    /// ```
-    pub fn add_singleton<T>(self) -> Module<ParentModule, HCons<SingletonProvider<T>, Providers>> {
-        self.add(SingletonProvider::<T>::new())
-    }
-
-    /// Add anything instance to provider. It likes singleton, but it cannot get dependencies from
-    /// the provider. Use it for adding single objects like configs.
-    ///
-    /// Can be resolved by reference or by cloning. If you wish to clone this dependency then it
-    /// must implement `DependencyClone` trait. For more information see `DependencyClone` trait.
-    ///
-    /// Usage:
-    /// ```
-    /// use teloc::*;
-    ///
-    /// #[derive(Debug, PartialEq)]
-    /// struct Config { token: String, ip: String }
-    ///
-    /// struct Service<'a> { token: &'a str, ip: &'a str }
-    /// #[inject]
-    /// impl<'a> Service<'a> {
-    ///     fn new(config: &'a Config) -> Self { Self { token: &config.token, ip: &config.ip } }
-    /// }
-    ///
-    /// let config = Config { token: "1234ABCDE".into(), ip: "192.168.0.1".into() };
-    ///
-    /// let sp = ServiceProvider::new()
-    ///     .add_instance(&config)
-    ///     .add_transient::<Service>();
-    ///
-    /// let config_ref: &Config = sp.resolve();
-    /// let s: Service = sp.resolve();
-    ///
-    /// assert_eq!(&config, config_ref);
-    /// assert_eq!(&config_ref.token, s.token);
-    /// assert_eq!(&config_ref.ip, s.ip);
-    /// ```
-    pub fn add_instance<T>(
-        self,
-        data: T,
-    ) -> Module<ParentModule, HCons<InstanceProvider<T>, Providers>> {
-        self.add(InstanceProvider::<T>::new(data))
     }
 }
