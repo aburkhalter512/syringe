@@ -34,8 +34,8 @@ use crate::module::Module;
 ///     provider.get()
 /// };
 ///```
-pub trait SelectProvider<'a, Provider, Index> {
-    fn select(&'a self) -> Provider;
+pub trait SelectProvider<'this, Provider, Index> {
+    fn select(&'this self) -> Provider;
 }
 
 pub struct SelfIndex<InnerIndex>(InnerIndex);
