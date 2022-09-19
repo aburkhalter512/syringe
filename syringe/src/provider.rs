@@ -2,46 +2,45 @@ use std::marker::PhantomData;
 
 use once_cell::sync::OnceCell;
 
-#[derive(Debug)]
 pub trait Provider<T> {}
 
-pub struct TransientProvider<T>(PhantomData<T>);
-impl<T> TransientProvider<T> {
+pub struct Transient<T>(PhantomData<T>);
+impl<T> Transient<T> {
     pub fn new() -> Self {
         Self(PhantomData)
     }
 }
 
-impl<T> Default for TransientProvider<T> {
+impl<T> Default for Transient<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> Provider<T> for TransientProvider<T> {}
+impl<T> Provider<T> for Transient<T> {}
 
 #[derive(Debug)]
-pub struct SingletonProvider<T>(OnceCell<T>);
-impl<T> SingletonProvider<T> {
+pub struct Singleton<T>(OnceCell<T>);
+impl<T> Singleton<T> {
     pub fn new() -> Self {
         Self(OnceCell::new())
     }
 }
 
-impl<T> Default for SingletonProvider<T> {
+impl<T> Default for Singleton<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> Provider<T> for SingletonProvider<T> {}
+impl<T> Provider<T> for Singleton<T> {}
 
 #[derive(Debug)]
-pub struct InstanceProvider<T>(T);
-impl<T> InstanceProvider<T> {
+pub struct Instance<T>(T);
+impl<T> Instance<T> {
     pub fn new(instance: T) -> Self {
         Self(instance)
     }
 }
 
-impl<T> Provider<T> for InstanceProvider<T> {}
+impl<T> Provider<T> for Instance<T> {}
