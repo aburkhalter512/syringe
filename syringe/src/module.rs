@@ -4,7 +4,7 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 use crate::inject::Inject;
-use crate::provider::{InstanceProvider, Provider, SingletonProvider, TransientProvider};
+use crate::provider::Provider;
 
 /// `ServiceProvider` struct is used as an IoC-container in which you declare your dependencies.
 ///
@@ -95,10 +95,14 @@ impl<ParentModule, Providers> Module<ParentModule, Providers> {
 }
 
 impl<ParentModule, Providers: HList> Module<ParentModule, Providers> {
-    pub fn add<Dependencies, T: Inject<Dependencies>, P: Provider<T>>(
+    pub fn add<'provider, Dependencies, T, P>(
         self,
         provider: P,
-    ) -> Module<ParentModule, HCons<P, Providers>> {
+    ) -> Module<ParentModule, HCons<P, Providers>>
+    where
+        T: Inject<Dependencies>,
+        P: Provider<'provider, T, Dependencies> + 'provider,
+    {
         let Module {
             parent_module,
             providers,
