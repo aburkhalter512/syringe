@@ -64,7 +64,7 @@ impl<ParentModule, Providers> Module<ParentModule, Providers> {
 }
 
 impl<ParentModule, Providers: HList> Module<ParentModule, Providers> {
-    pub fn add<'provider, Dependencies, T, P>(
+    pub fn with_provider<'provider, Dependencies, T, P>(
         self,
         provider: P,
     ) -> Module<ParentModule, HCons<P, Providers>>
