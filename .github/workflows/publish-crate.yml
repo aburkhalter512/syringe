@@ -21,6 +21,10 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
+      - name: Setup git config
+        run: |
+          git config user.name "Publish Bot"
+          git config user.email "<>"
       - name: Install cargo-workspaces
         run: cargo install cargo-workspaces
       - name: Publish with ${{ inputs.semver }} version
