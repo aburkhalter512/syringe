@@ -24,5 +24,5 @@ jobs:
       - name: Install cargo-workspaces
         run: cargo install cargo-workspaces
       - name: Publish with ${{ inputs.semver }} version
-        run: cargo ws publish ${{ inputs.semver }} --token ${{ secrets.CRATESIO_TOKEN }}
+        run: cargo ws publish ${{ inputs.semver }} --token ${{ secrets.CRATESIO_TOKEN }} --yes
 
