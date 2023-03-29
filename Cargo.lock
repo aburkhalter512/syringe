@@ -108,16 +108,16 @@ dependencies = [
 ]
 
 [[package]]
-name = "syringe"
-version = "0.0.2"
+name = "syringe-di"
+version = "0.0.1"
 dependencies = [
  "frunk",
  "once_cell",
 ]
 
 [[package]]
-name = "syringe_derive"
-version = "0.0.2"
+name = "syringe-di-derive"
+version = "0.0.1"
 
 [[package]]
 name = "unicode-ident"
