@@ -1,7 +1,7 @@
 [package]
 name = "syringe-di"
 description = "A compile-time dependency injection framework for Rust"
-version = "0.0.2"
+version = "0.0.0"
 edition = "2021"
 repository = "https://github.com/aburkhalter512/syringe"
 license = "MIT"
